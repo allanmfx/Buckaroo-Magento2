@@ -144,6 +144,19 @@ class Ideal extends AbstractMethod
         $chosenIssuer = $paymentInfo->getAdditionalInformation('issuer');
 
         $valid = false;
+
+        if (!$chosenIssuer) {
+    	    if ($content = $this->request->getContent()) {
+                $jsonDecode = $this->helper->getJson()->unserialize($content);
+                if (!empty($jsonDecode['paymentMethod']['additional_data']['issuer'])) {
+                    $chosenIssuer = $jsonDecode['paymentMethod']['additional_data']['issuer'];
+                    $this->getInfoInstance()->setAdditionalInformation('issuer', $chosenIssuer);
+                }else{
+                    $valid = true;
+                }
+    	    }
+        }
+        
         foreach ($config->getIssuers() as $issuer) {
             if ($issuer['code'] == $chosenIssuer) {
                 $valid = true;
